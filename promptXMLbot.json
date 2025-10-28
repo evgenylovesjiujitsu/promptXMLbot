@@ -1,0 +1,114 @@
+{
+  "name": "promptXMLbot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "ce542691-2015-4f1e-b239-417b7e500c0f",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        256
+      ],
+      "webhookId": "e7b37434-dc53-4ed0-80e8-7ba20e8362e6",
+      "credentials": {
+        "telegramApi": {
+          "id": "jOyiiQL0QjK3iB44",
+          "name": "Telegram account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ \n{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Ти prompt engineer. Покращ промпт користувача та структуруй його у XML форматі. Відповідай ТІЛЬКИ українською. Використовуй теги: <context>, <task>, <instructions>, <output_format>. Обгорни у ```xml блок.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": $json.message.text\n    }\n  ],\n  \"temperature\": 0.5\n}\n}}",
+        "options": {}
+      },
+      "id": "9ef27007-12b5-4e7b-8a79-a9977fa5e815",
+      "name": "Groq API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        256
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "EjjDuqa7DQTHifdx",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.choices[0].message.content }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "9802109a-ffc9-48dd-838b-a837ffb15509",
+      "name": "Send Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        256
+      ],
+      "webhookId": "92bd6bdc-2d48-4a36-90c6-e1b390763ac5",
+      "credentials": {
+        "telegramApi": {
+          "id": "jOyiiQL0QjK3iB44",
+          "name": "Telegram account 4"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Groq API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq API": {
+      "main": [
+        [
+          {
+            "node": "Send Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d5a2a4de-deff-45f7-9d65-8befceae7010",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "43df14c744fc1081d10f365cbcf89d662c8340a409bc2247fdfacfca9e2153e2"
+  },
+  "id": "XJBRTzqsCLYZrVSj",
+  "tags": []
+}
